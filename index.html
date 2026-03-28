@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>R Cheatsheet — Data Science for Biologists</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Fraunces:ital,wght@0,300;0,700;0,900;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f2eb;
+  --surface: #ffffff;
+  --surface2: #f0ece2;
+  --border: #ddd8cc;
+  --ink: #1a1a14;
+  --muted: #888070;
+  --code-bg: #1a1a14;
+  --code-text: #e8e4d8;
+  --a1: #2d6a4f;   /* forest green */
+  --a2: #b5451b;   /* rust */
+  --a3: #1b4588;   /* deep blue */
+  --a4: #7b5ea7;   /* violet */
+  --a5: #c17f24;   /* amber */
+  --a6: #3d7a8a;   /* teal */
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Fraunces', serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* NAV */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--ink);
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+nav::-webkit-scrollbar { display: none; }
+
+nav a {
+  color: #aaa;
+  text-decoration: none;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.5px;
+  padding: 12px 10px;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+nav a:hover { color: #fff; border-bottom-color: var(--a1); }
+
+/* PAGE */
+.page { max-width: 1200px; margin: 0 auto; padding: 48px 24px 80px; }
+
+/* HERO */
+.hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  border-bottom: 3px solid var(--ink);
+  padding-bottom: 28px;
+  margin-bottom: 56px;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.hero-title {
+  font-size: 4rem;
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -3px;
+}
+
+.hero-title em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--a1);
+}
+
+.hero-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 1px;
+  line-height: 1.8;
+  text-align: right;
+}
+
+/* SECTION */
+.section { margin-bottom: 56px; scroll-margin-top: 48px; }
+
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.section-label .num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--muted);
+  letter-spacing: 2px;
+}
+
+.section-label h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* GRID */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.grid.wide { grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); }
+.grid.full { grid-template-columns: 1fr; }
+
+/* CARD */
+.card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.card-head {
+  padding: 10px 16px;
+  border-bottom: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-head .stripe {
+  width: 3px;
+  height: 16px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.card-head h3 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ROW */
+.row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  align-items: start;
+}
+.row:last-child { border-bottom: none; }
+.row.wide-label { grid-template-columns: 260px 1fr; }
+.row.single { grid-template-columns: 1fr; }
+
+.fn {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: var(--code-bg);
+  color: var(--code-text);
+  word-break: break-all;
+  line-height: 1.6;
+  align-self: start;
+}
+
+.fn.green  { color: #7ecba6; }
+.fn.orange { color: #f0a868; }
+.fn.blue   { color: #7ab4f5; }
+.fn.pink   { color: #f4a0c0; }
+.fn.yellow { color: #f0d080; }
+.fn.teal   { color: #80d4d4; }
+
+.def {
+  font-size: 0.82rem;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.def .note {
+  display: block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.def .ex {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-top: 3px;
+  color: var(--a2);
+}
+
+/* TRAP BOX */
+.trap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.trap {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-left: 4px solid var(--a2);
+  border-radius: 0 8px 8px 0;
+  padding: 12px 14px;
+}
+
+.trap .trap-fn {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--a2);
+  margin-bottom: 4px;
+}
+
+.trap .trap-desc {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.trap .trap-note {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--muted);
+  margin-top: 3px;
+  display: block;
+}
+
+footer {
+  text-align: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  padding-top: 24px;
+  margin-top: 48px;
+  letter-spacing: 1px;
+}
+
+@media (max-width: 600px) {
+  .hero-title { font-size: 2.5rem; }
+  .row { grid-template-columns: 1fr; }
+  .row.wide-label { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#basics">Basics</a>
+  <a href="#operators">Operators</a>
+  <a href="#vectors">Vectors</a>
+  <a href="#matrices">Matrices</a>
+  <a href="#dataframes">Data Frames</a>
+  <a href="#strings">Strings</a>
+  <a href="#control">Control Flow</a>
+  <a href="#functions">Functions</a>
+  <a href="#fileio">File I/O</a>
+  <a href="#stats">Statistics</a>
+  <a href="#distributions">Distributions</a>
+  <a href="#tests">Tests</a>
+  <a href="#linear">Linear Models</a>
+  <a href="#bio">Biology Packages</a>
+  <a href="#plotting">Plotting</a>
+  <a href="#traps">Traps</a>
+</nav>
+
+<div class="page">
+
+  <div class="hero">
+    <div>
+      <div class="hero-title">R <em>for</em><br>Biology</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:var(--muted);margin-top:10px;letter-spacing:1px;">DATA SCIENCE · STATISTICS · BIOINFORMATICS</div>
+    </div>
+    <div class="hero-sub">
+      Operators · Vectors · Matrices<br>
+      Data Frames · File I/O · Stats<br>
+      Distributions · Tests · Models<br>
+      Bioconductor · ggplot2 · dplyr
+    </div>
+  </div>
+
+  <!-- 1. BASICS -->
+  <div class="section" id="basics">
+    <div class="section-label"><span class="num">01</span><h2>Basics & Data Types</h2></div>
+    <div class="grid">
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a1)"></div><h3>Assignment & Output</h3></div>
+        <div class="row"><span class="fn green">x &lt;- 5</span><div class="def">Assign value to variable (preferred)<span class="note">x = 5 also works but &lt;- is standard</span></div></div>
+        <div class="row"><span class="fn green">print(x)</span><div class="def">Explicitly print to console</div></div>
+        <div class="row"><span class="fn green">cat("val:", x, "\n")</span><div class="def">Print without quotes — good for messages</div></div>
+        <div class="row"><span class="fn green">rm(x)</span><div class="def">Remove variable from environment</div></div>
+        <div class="row"><span class="fn green">ls()</span><div class="def">List all variables in environment</div></div>
+        <div class="row"><span class="fn green">getwd() / setwd()</span><div class="def">Get / set working directory</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a2)"></div><h3>Data Types</h3></div>
+        <div class="row"><span class="fn orange">numeric</span><div class="def">Decimal numbers — 3.14, 2.0<span class="note">default number type in R</span></div></div>
+        <div class="row"><span class="fn orange">integer</span><div class="def">Whole numbers — 3L (L suffix makes integer)</div></div>
+        <div class="row"><span class="fn orange">character</span><div class="def">Text strings — "hello", "ATCG"</div></div>
+        <div class="row"><span class="fn orange">logical</span><div class="def">TRUE / FALSE (also T / F)</div></div>
+        <div class="row"><span class="fn orange">complex</span><div class="def">Complex numbers — 3+2i</div></div>
+        <div class="row"><span class="fn orange">NA</span><div class="def">Missing value — not zero, not empty<span class="note">NA propagates through calculations</span></div></div>
+        <div class="row"><span class="fn orange">NULL</span><div class="def">Absence of any object — length is 0</div></div>
+        <div class="row"><span class="fn orange">NaN / Inf</span><div class="def">Not a Number / Infinity (0/0, 1/0)</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a3)"></div><h3>Type Checking & Conversion</h3></div>
+        <div class="row"><span class="fn blue">class(x)</span><div class="def">Returns type name<div class="ex">"numeric", "character"</div></div></div>
+        <div class="row"><span class="fn blue">typeof(x)</span><div class="def">Internal storage type</div></div>
+        <div class="row"><span class="fn blue">is.numeric(x)</span><div class="def">TRUE if numeric</div></div>
+        <div class="row"><span class="fn blue">is.character(x)</span><div class="def">TRUE if character</div></div>
+        <div class="row"><span class="fn blue">is.na(x)</span><div class="def">TRUE where values are NA<span class="note">Use this — x == NA never works</span></div></div>
+        <div class="row"><span class="fn blue">as.numeric(x)</span><div class="def">Convert to number</div></div>
+        <div class="row"><span class="fn blue">as.character(x)</span><div class="def">Convert to string</div></div>
+        <div class="row"><span class="fn blue">as.logical(x)</span><div class="def">Convert to TRUE/FALSE</div></div>
+        <div class="row"><span class="fn blue">as.factor(x)</span><div class="def">Convert to categorical factor</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 2. OPERATORS -->
+  <div class="section" id="operators">
+    <div class="section-label"><span class="num">02</span><h2>Operators</h2></div>
+    <div class="grid">
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a5)"></div><h3>Arithmetic</h3></div>
+        <div class="row"><span class="fn yellow">+  -  *  /</span><div class="def">Add, subtract, multiply, divide</div></div>
+        <div class="row"><span class="fn yellow">%%</span><div class="def">Modulo — remainder<div class="ex">10 %% 3 → 1</div></div></div>
+        <div class="row"><span class="fn yellow">%/%</span><div class="def">Integer division — quotient only<div class="ex">10 %/% 3 → 3</div></div></div>
+        <div class="row"><span class="fn yellow">^</span><div class="def">Exponent<div class="ex">2^8 → 256</div></div></div>
+        <div class="row"><span class="fn yellow">sqrt(x)</span><div class="def">Square root</div></div>
+        <div class="row"><span class="fn yellow">abs(x)</span><div class="def">Absolute value</div></div>
+        <div class="row"><span class="fn yellow">exp(x)</span><div class="def">e raised to x</div></div>
+        <div class="row"><span class="fn yellow">log(x)</span><div class="def">Natural log (base e)<span class="note">log(x, base=10) for log10, log2(x) for log2</span></div></div>
+        <div class="row"><span class="fn yellow">round(x, n)</span><div class="def">Round to n decimal places</div></div>
+        <div class="row"><span class="fn yellow">ceiling / floor</span><div class="def">Round up / round down to integer</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a2)"></div><h3>Relational (return TRUE/FALSE)</h3></div>
+        <div class="row"><span class="fn orange">==</span><div class="def">Equal to</div></div>
+        <div class="row"><span class="fn orange">!=</span><div class="def">Not equal to</div></div>
+        <div class="row"><span class="fn orange">&lt;  &gt;</span><div class="def">Less than / Greater than</div></div>
+        <div class="row"><span class="fn orange">&lt;=  &gt;=</span><div class="def">Less/Greater than or equal to</div></div>
+        <div class="row"><span class="fn orange">%in%</span><div class="def">Check membership in a vector<div class="ex">"A" %in% c("A","B","C") → TRUE</div></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a4)"></div><h3>Logical</h3></div>
+        <div class="row"><span class="fn pink">&amp;</span><div class="def">Element-wise AND<div class="ex">TRUE &amp; FALSE → FALSE</div></div></div>
+        <div class="row"><span class="fn pink">|</span><div class="def">Element-wise OR<div class="ex">TRUE | FALSE → TRUE</div></div></div>
+        <div class="row"><span class="fn pink">!</span><div class="def">NOT<div class="ex">!TRUE → FALSE</div></div></div>
+        <div class="row"><span class="fn pink">&amp;&amp;  ||</span><div class="def">Short-circuit AND/OR — single values only<span class="note">Use in if() conditions, not on vectors</span></div></div>
+        <div class="row"><span class="fn pink">xor(a,b)</span><div class="def">Exclusive OR — TRUE if exactly one is TRUE</div></div>
+        <div class="row"><span class="fn pink">any(x)</span><div class="def">TRUE if at least one element is TRUE</div></div>
+        <div class="row"><span class="fn pink">all(x)</span><div class="def">TRUE if all elements are TRUE</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 3. VECTORS -->
+  <div class="section" id="vectors">
+    <div class="section-label"><span class="num">03</span><h2>Vectors</h2></div>
+    <div class="grid">
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a1)"></div><h3>Create</h3></div>
+        <div class="row"><span class="fn green">c(1, 2, 3)</span><div class="def">Combine into vector</div></div>
+        <div class="row"><span class="fn green">1:10</span><div class="def">Integer sequence 1 to 10</div></div>
+        <div class="row"><span class="fn green">seq(1, 10, by=2)</span><div class="def">Sequence with step<div class="ex">→ 1,3,5,7,9</div></div></div>
+        <div class="row"><span class="fn green">seq(0, 1, length.out=5)</span><div class="def">Sequence of exact length</div></div>
+        <div class="row"><span class="fn green">rep(x, n)</span><div class="def">Repeat x n times<div class="ex">rep(0, 5) → 0,0,0,0,0</div></div></div>
+        <div class="row"><span class="fn green">rep(x, each=n)</span><div class="def">Repeat each element n times<div class="ex">rep(c(1,2), each=2) → 1,1,2,2</div></div></div>
+        <div class="row"><span class="fn green">vector("numeric", 5)</span><div class="def">Pre-allocated zero vector of length 5</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a2)"></div><h3>Access & Modify</h3></div>
+        <div class="row"><span class="fn orange">x[3]</span><div class="def">3rd element (R is 1-indexed)</div></div>
+        <div class="row"><span class="fn orange">x[2:5]</span><div class="def">Elements 2 through 5</div></div>
+        <div class="row"><span class="fn orange">x[c(1,3,5)]</span><div class="def">Elements at positions 1, 3, 5</div></div>
+        <div class="row"><span class="fn orange">x[-2]</span><div class="def">All elements EXCEPT index 2</div></div>
+        <div class="row"><span class="fn orange">x[x &gt; 5]</span><div class="def">All elements greater than 5</div></div>
+        <div class="row"><span class="fn orange">x[is.na(x)]</span><div class="def">All NA elements</div></div>
+        <div class="row"><span class="fn orange">x[!is.na(x)]</span><div class="def">All non-NA elements</div></div>
+        <div class="row"><span class="fn orange">names(x)</span><div class="def">Get or set element names</div></div>
+        <div class="row"><span class="fn orange">x["label"]</span><div class="def">Access by name</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a3)"></div><h3>Info & Summarise</h3></div>
+        <div class="row"><span class="fn blue">length(x)</span><div class="def">Number of elements</div></div>
+        <div class="row"><span class="fn blue">sum(x)</span><div class="def">Sum of all elements</div></div>
+        <div class="row"><span class="fn blue">prod(x)</span><div class="def">Product of all elements</div></div>
+        <div class="row"><span class="fn blue">cumsum(x)</span><div class="def">Running cumulative sum</div></div>
+        <div class="row"><span class="fn blue">min(x) / max(x)</span><div class="def">Min and max values</div></div>
+        <div class="row"><span class="fn blue">which.min(x)</span><div class="def">Index of minimum value</div></div>
+        <div class="row"><span class="fn blue">which.max(x)</span><div class="def">Index of maximum value</div></div>
+        <div class="row"><span class="fn blue">which(x &gt; 5)</span><div class="def">Indices where condition is TRUE</div></div>
+        <div class="row"><span class="fn blue">sort(x)</span><div class="def">Sort ascending<span class="note">sort(x, decreasing=TRUE) for descending</span></div></div>
+        <div class="row"><span class="fn blue">order(x)</span><div class="def">Indices that would sort x</div></div>
+        <div class="row"><span class="fn blue">rev(x)</span><div class="def">Reverse order</div></div>
+        <div class="row"><span class="fn blue">unique(x)</span><div class="def">Remove duplicates</div></div>
+        <div class="row"><span class="fn blue">duplicated(x)</span><div class="def">TRUE where elements are duplicates</div></div>
+        <div class="row"><span class="fn blue">table(x)</span><div class="def">Frequency count of each value</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 4. MATRICES -->
+  <div class="section" id="matrices">
+    <div class="section-label"><span class="num">04</span><h2>Matrices</h2></div>
+    <div class="grid">
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a1)"></div><h3>Create & Combine</h3></div>
+        <div class="row wide-label"><span class="fn green">matrix(data, nrow, ncol, byrow)</span><div class="def">Create matrix<span class="note">byrow=FALSE fills column-by-column (default)</span><span class="note">byrow=TRUE fills row-by-row</span></div></div>
+        <div class="row"><span class="fn green">rbind(a, b)</span><div class="def">Stack rows vertically</div></div>
+        <div class="row"><span class="fn green">cbind(a, b)</span><div class="def">Append columns side by side</div></div>
+        <div class="row"><span class="fn green">diag(n)</span><div class="def">Identity matrix of size n×n</div></div>
+        <div class="row"><span class="fn green">diag(x)</span><div class="def">Diagonal matrix from vector x</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a2)"></div><h3>Access & Info</h3></div>
+        <div class="row"><span class="fn orange">M[2, 3]</span><div class="def">Row 2, column 3</div></div>
+        <div class="row"><span class="fn orange">M[1, ]</span><div class="def">Entire row 1</div></div>
+        <div class="row"><span class="fn orange">M[, 2]</span><div class="def">Entire column 2</div></div>
+        <div class="row"><span class="fn orange">nrow(M) / ncol(M)</span><div class="def">Row / column counts</div></div>
+        <div class="row"><span class="fn orange">dim(M)</span><div class="def">Returns c(nrow, ncol)</div></div>
+        <div class="row"><span class="fn orange">rownames / colnames</span><div class="def">Get or set row/column names</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a3)"></div><h3>Operations</h3></div>
+        <div class="row"><span class="fn blue">t(M)</span><div class="def">Transpose</div></div>
+        <div class="row"><span class="fn blue">M %*% N</span><div class="def">Matrix multiplication</div></div>
+        <div class="row"><span class="fn blue">M * N</span><div class="def">Element-wise multiplication (not matrix mult)</div></div>
+        <div class="row"><span class="fn blue">det(M)</span><div class="def">Determinant</div></div>
+        <div class="row"><span class="fn blue">solve(M)</span><div class="def">Inverse of M<span class="note">solve(A, b) solves Ax = b</span></div></div>
+        <div class="row"><span class="fn blue">norm(M, "2")</span><div class="def">Euclidean norm<div class="ex">c(4,1) → sqrt(17) ≈ 4.12</div></div></div>
+        <div class="row"><span class="fn blue">rowSums / colSums</span><div class="def">Sum across rows / columns</div></div>
+        <div class="row"><span class="fn blue">rowMeans / colMeans</span><div class="def">Mean across rows / columns</div></div>
+        <div class="row"><span class="fn blue">apply(M, 1, fn)</span><div class="def">Apply fn to each row (1) or col (2)</div></div>
+        <div class="row"><span class="fn blue">eigen(M)</span><div class="def">Eigenvalues and eigenvectors<span class="note">$values and $vectors</span></div></div>
+        <div class="row"><span class="fn blue">svd(M)</span><div class="def">Singular value decomposition<span class="note">$d, $u, $v components</span></div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 5. DATA FRAMES -->
+  <div class="section" id="dataframes">
+    <div class="section-label"><span class="num">05</span><h2>Data Frames</h2></div>
+    <div class="grid wide">
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a1)"></div><h3>Create & Inspect</h3></div>
+        <div class="row"><span class="fn green">data.frame(a=c(1,2), b=c("x","y"))</span><div class="def">Create data frame from named vectors</div></div>
+        <div class="row"><span class="fn green">head(df, n)</span><div class="def">First n rows (default 6)</div></div>
+        <div class="row"><span class="fn green">tail(df, n)</span><div class="def">Last n rows</div></div>
+        <div class="row"><span class="fn green">str(df)</span><div class="def">Structure — column names, types, preview</div></div>
+        <div class="row"><span class="fn green">summary(df)</span><div class="def">Min,Q1,Median,Mean,Q3,Max per column<span class="note">Does NOT return Mode</span></div></div>
+        <div class="row"><span class="fn green">dim(df)</span><div class="def">Rows and columns as c(n, p)</div></div>
+        <div class="row"><span class="fn green">nrow / ncol</span><div class="def">Row and column counts</div></div>
+        <div class="row"><span class="fn green">colnames / rownames</span><div class="def">Get or set names</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a2)"></div><h3>Access, Filter & Modify</h3></div>
+        <div class="row"><span class="fn orange">df$column</span><div class="def">Access column by name — returns vector</div></div>
+        <div class="row"><span class="fn orange">df[i, j]</span><div class="def">Row i, column j</div></div>
+        <div class="row"><span class="fn orange">df[df$col &gt; 5, ]</span><div class="def">Filter rows by condition</div></div>
+        <div class="row"><span class="fn orange">subset(df, col &gt; 5)</span><div class="def">Cleaner filtering syntax</div></div>
+        <div class="row"><span class="fn orange">df$new &lt;- values</span><div class="def">Add new column</div></div>
+        <div class="row"><span class="fn orange">df$col &lt;- NULL</span><div class="def">Delete a column</div></div>
+        <div class="row"><span class="fn orange">merge(df1, df2, by="id")</span><div class="def">Join two data frames by key column<span class="note">all.x=TRUE for left join, all=TRUE for full join</span></div></div>
+        <div class="row"><span class="fn orange">rbind(df1, df2)</span><div class="def">Stack data frames vertically (same columns)</div></div>
+        <div class="row"><span class="fn orange">na.omit(df)</span><div class="def">Remove all rows with any NA</div></div>
+        <div class="row"><span class="fn orange">complete.cases(df)</span><div class="def">Logical vector — TRUE for rows with no NA</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 6. STRINGS -->
+  <div class="section" id="strings">
+    <div class="section-label"><span class="num">06</span><h2>Strings & Characters</h2></div>
+    <div class="grid">
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a6)"></div><h3>String Functions</h3></div>
+        <div class="row"><span class="fn teal">nchar(x)</span><div class="def">Number of characters</div></div>
+        <div class="row"><span class="fn teal">paste(a, b, sep="-")</span><div class="def">Concatenate with separator<div class="ex">paste("A","B",sep="") → "AB"</div></div></div>
+        <div class="row"><span class="fn teal">paste0(a, b)</span><div class="def">Concatenate — no separator</div></div>
+        <div class="row"><span class="fn teal">toupper / tolower</span><div class="def">Change case</div></div>
+        <div class="row"><span class="fn teal">trimws(x)</span><div class="def">Remove leading/trailing whitespace</div></div>
+        <div class="row"><span class="fn teal">substring(x, 1, 3)</span><div class="def">Extract characters 1 to 3</div></div>
+        <div class="row"><span class="fn teal">strsplit(x, " ")</span><div class="def">Split string by delimiter — returns list</div></div>
+        <div class="row"><span class="fn teal">grep("pat", x)</span><div class="def">Indices where pattern matches</div></div>
+        <div class="row"><span class="fn teal">grepl("pat", x)</span><div class="def">TRUE/FALSE where pattern matches</div></div>
+        <div class="row"><span class="fn teal">gsub("old","new",x)</span><div class="def">Replace all matches</div></div>
+        <div class="row"><span class="fn teal">sub("old","new",x)</span><div class="def">Replace first match only</div></div>
+        <div class="row"><span class="fn teal">sprintf("%s has %d genes", s, n)</span><div class="def">Formatted string (like printf)<div class="ex">%s=string %d=integer %f=float</div></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a5)"></div><h3>Escape Sequences & Factors</h3></div>
+        <div class="row"><span class="fn yellow">\t</span><div class="def">Tab — used in sep="\t" for file reading</div></div>
+        <div class="row"><span class="fn yellow">\n</span><div class="def">Newline</div></div>
+        <div class="row"><span class="fn yellow">\\</span><div class="def">Literal backslash</div></div>
+        <div class="row"><span class="fn yellow">\"</span><div class="def">Literal quote inside string</div></div>
+        <div class="row single" style="padding-top:8px;padding-bottom:4px"><span style="font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">FACTORS (categorical data)</span></div>
+        <div class="row"><span class="fn yellow">factor(x)</span><div class="def">Convert to factor (categorical)</div></div>
+        <div class="row"><span class="fn yellow">levels(f)</span><div class="def">Get categories of factor</div></div>
+        <div class="row"><span class="fn yellow">nlevels(f)</span><div class="def">Number of categories</div></div>
+        <div class="row"><span class="fn yellow">relevel(f, ref="ctrl")</span><div class="def">Change reference level — important in regression</div></div>
+        <div class="row"><span class="fn yellow">droplevels(f)</span><div class="def">Remove unused factor levels</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 7. CONTROL FLOW -->
+  <div class="section" id="control">
+    <div class="section-label"><span class="num">07</span><h2>Control Flow</h2></div>
+    <div class="grid">
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a4)"></div><h3>Conditionals</h3></div>
+        <div class="row single"><span class="fn pink">if (cond) { } else if (cond2) { } else { }</span><div class="def" style="margin-top:6px">Standard conditional — runs one branch</div></div>
+        <div class="row"><span class="fn pink">ifelse(cond, yes, no)</span><div class="def">Vectorised — applies to whole vector at once<div class="ex">ifelse(x&gt;0, "pos", "neg")</div></div></div>
+        <div class="row"><span class="fn pink">switch(val, a="x", b="y")</span><div class="def">Multi-branch on string value</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a3)"></div><h3>Loops</h3></div>
+        <div class="row"><span class="fn blue">for (i in 1:n) { }</span><div class="def">Iterate over sequence</div></div>
+        <div class="row"><span class="fn blue">for (val in vec) { }</span><div class="def">Iterate over vector elements</div></div>
+        <div class="row"><span class="fn blue">while (cond) { }</span><div class="def">Loop while condition is TRUE</div></div>
+        <div class="row"><span class="fn blue">repeat { if(cond) break }</span><div class="def">Infinite loop — needs explicit break</div></div>
+        <div class="row"><span class="fn blue">break</span><div class="def">Exit current loop immediately</div></div>
+        <div class="row"><span class="fn blue">next</span><div class="def">Skip to next iteration (like continue)</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 8. FUNCTIONS -->
+  <div class="section" id="functions">
+    <div class="section-label"><span class="num">08</span><h2>Functions & Apply Family</h2></div>
+    <div class="grid">
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a1)"></div><h3>Define Functions</h3></div>
+        <div class="row single"><span class="fn green">myFn &lt;- function(x, y=1) { x + y }</span><div class="def" style="margin-top:6px">y=1 is a default argument. Last expression is returned automatically.</div></div>
+        <div class="row"><span class="fn green">return(val)</span><div class="def">Explicitly return value and exit function</div></div>
+        <div class="row"><span class="fn green">missing(arg)</span><div class="def">TRUE if argument was not provided</div></div>
+        <div class="row"><span class="fn green">...</span><div class="def">Capture extra arguments (pass-through)<div class="ex">function(x, ...) { plot(x, ...) }</div></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a2)"></div><h3>Apply Family (avoid slow loops)</h3></div>
+        <div class="row"><span class="fn orange">apply(M, 1, fn)</span><div class="def">Apply fn to rows (1) or cols (2) of matrix</div></div>
+        <div class="row"><span class="fn orange">sapply(x, fn)</span><div class="def">Apply fn to list/vector — simplify to vector/matrix</div></div>
+        <div class="row"><span class="fn orange">lapply(x, fn)</span><div class="def">Apply fn to list/vector — always returns list</div></div>
+        <div class="row"><span class="fn orange">vapply(x, fn, type)</span><div class="def">Like sapply but type-safe — safer in production</div></div>
+        <div class="row"><span class="fn orange">tapply(x, group, fn)</span><div class="def">Apply fn to x grouped by factor<div class="ex">tapply(height, species, mean)</div></div></div>
+        <div class="row"><span class="fn orange">mapply(fn, x, y)</span><div class="def">Apply fn to multiple arguments in parallel</div></div>
+        <div class="row"><span class="fn orange">Reduce(fn, x)</span><div class="def">Cumulatively apply fn<div class="ex">Reduce("+", c(1,2,3)) → 6</div></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a3)"></div><h3>Lists</h3></div>
+        <div class="row"><span class="fn blue">list(a=1, b="x")</span><div class="def">Named list — can hold mixed types</div></div>
+        <div class="row"><span class="fn blue">lst$name</span><div class="def">Access named element</div></div>
+        <div class="row"><span class="fn blue">lst[[2]]</span><div class="def">Access by index — returns element (not list)</div></div>
+        <div class="row"><span class="fn blue">lst[2]</span><div class="def">Returns sub-list (still a list)</div></div>
+        <div class="row"><span class="fn blue">length(lst)</span><div class="def">Number of elements</div></div>
+        <div class="row"><span class="fn blue">names(lst)</span><div class="def">Element names</div></div>
+        <div class="row"><span class="fn blue">unlist(lst)</span><div class="def">Flatten list to vector</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 9. FILE I/O -->
+  <div class="section" id="fileio">
+    <div class="section-label"><span class="num">09</span><h2>File Input / Output</h2></div>
+    <div class="grid">
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a5)"></div><h3>Reading Data</h3></div>
+        <div class="row wide-label"><span class="fn yellow">read.table(file, header=T, sep="\t")</span><div class="def">Read any delimited file<span class="note">sep="\t" tab · sep="," CSV · sep=" " space</span><span class="note">header=TRUE if first row is column names</span></div></div>
+        <div class="row"><span class="fn yellow">read.csv(file)</span><div class="def">Shortcut for comma-separated</div></div>
+        <div class="row"><span class="fn yellow">read.delim(file)</span><div class="def">Shortcut for tab-separated</div></div>
+        <div class="row wide-label"><span class="fn yellow">read.csv(file, stringsAsFactors=F)</span><div class="def">Prevent auto-conversion of strings to factors</div></div>
+        <div class="row"><span class="fn yellow">readLines(file)</span><div class="def">Read file as vector of text lines</div></div>
+        <div class="row"><span class="fn yellow">readRDS(file)</span><div class="def">Load saved R object (.rds)</div></div>
+        <div class="row"><span class="fn yellow">load("file.RData")</span><div class="def">Load .RData workspace</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a6)"></div><h3>Writing Data</h3></div>
+        <div class="row wide-label"><span class="fn teal">write.table(df, file, sep="\t", row.names=F)</span><div class="def">Write data frame — row.names=F avoids extra column</div></div>
+        <div class="row"><span class="fn teal">write.csv(df, file, row.names=F)</span><div class="def">Write CSV</div></div>
+        <div class="row"><span class="fn teal">saveRDS(obj, file)</span><div class="def">Save single R object</div></div>
+        <div class="row"><span class="fn teal">save(a, b, file="out.RData")</span><div class="def">Save multiple objects</div></div>
+        <div class="row"><span class="fn teal">writeLines(x, file)</span><div class="def">Write character vector to file</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 10. STATISTICS -->
+  <div class="section" id="stats">
+    <div class="section-label"><span class="num">10</span><h2>Descriptive Statistics</h2></div>
+    <div class="grid">
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a1)"></div><h3>Central Tendency & Spread</h3></div>
+        <div class="row"><span class="fn green">mean(x, na.rm=T)</span><div class="def">Arithmetic mean — na.rm removes NAs first</div></div>
+        <div class="row"><span class="fn green">median(x)</span><div class="def">Middle value</div></div>
+        <div class="row"><span class="fn green">var(x)</span><div class="def">Sample variance (divides by n-1)</div></div>
+        <div class="row"><span class="fn green">sd(x)</span><div class="def">Sample standard deviation</div></div>
+        <div class="row"><span class="fn green">range(x)</span><div class="def">Returns c(min, max)</div></div>
+        <div class="row"><span class="fn green">IQR(x)</span><div class="def">Interquartile range = Q3 - Q1</div></div>
+        <div class="row"><span class="fn green">quantile(x, 0.25)</span><div class="def">25th percentile (Q1)<span class="note">quantile(x, c(0.25, 0.75)) gives Q1 and Q3</span></div></div>
+        <div class="row"><span class="fn green">summary(x)</span><div class="def">Min, Q1, Median, Mean, Q3, Max<span class="note">Mode is NOT included</span></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a2)"></div><h3>Association & Ranking</h3></div>
+        <div class="row"><span class="fn orange">cov(x, y)</span><div class="def">Covariance — direction of linear relationship</div></div>
+        <div class="row"><span class="fn orange">cor(x, y)</span><div class="def">Pearson correlation — standardised [-1,1]<span class="note">method="spearman" for rank-based (non-normal data)</span><span class="note">method="kendall" for small samples with ties</span></div></div>
+        <div class="row"><span class="fn orange">cor.test(x, y)</span><div class="def">Correlation with p-value and confidence interval</div></div>
+        <div class="row"><span class="fn orange">rank(x)</span><div class="def">Rank each element</div></div>
+        <div class="row"><span class="fn orange">scale(x)</span><div class="def">Standardise — subtract mean, divide by sd<span class="note">Produces Z-scores</span></div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 11. DISTRIBUTIONS -->
+  <div class="section" id="distributions">
+    <div class="section-label"><span class="num">11</span><h2>Probability Distributions</h2></div>
+    <div class="grid wide">
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a3)"></div><h3>Distribution Function Prefixes</h3></div>
+        <div class="row"><span class="fn blue">d___( )</span><div class="def">Density / PMF — probability at exact value x<div class="ex">dnorm(0) → 0.3989</div></div></div>
+        <div class="row"><span class="fn blue">p___( )</span><div class="def">CDF — P(X ≤ x)<div class="ex">pnorm(1.96) ≈ 0.975</div></div></div>
+        <div class="row"><span class="fn blue">q___( )</span><div class="def">Quantile — find x such that P(X ≤ x) = p<div class="ex">qnorm(0.975) ≈ 1.96</div></div></div>
+        <div class="row"><span class="fn blue">r___( )</span><div class="def">Random samples from distribution<div class="ex">rnorm(100, mean=0, sd=1)</div></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a4)"></div><h3>Key Distributions</h3></div>
+        <div class="row"><span class="fn pink">norm(x, mean, sd)</span><div class="def">Normal distribution<span class="note">E[X]=mean, Var=sd²</span></div></div>
+        <div class="row"><span class="fn pink">binom(x, size, prob)</span><div class="def">Binomial — count of successes in n trials<span class="note">E[X]=np, Var=np(1-p)</span></div></div>
+        <div class="row"><span class="fn pink">pois(x, lambda)</span><div class="def">Poisson — count of rare events<span class="note">E[X]=λ, Var=λ (mean=variance)</span></div></div>
+        <div class="row"><span class="fn pink">exp(x, rate)</span><div class="def">Exponential — time between events<span class="note">E[X]=1/λ, rate=λ</span></div></div>
+        <div class="row"><span class="fn pink">t(x, df)</span><div class="def">t-distribution — heavy tails for small n</div></div>
+        <div class="row"><span class="fn pink">chisq(x, df)</span><div class="def">Chi-squared — for variance tests, categorical</div></div>
+        <div class="row"><span class="fn pink">f(x, df1, df2)</span><div class="def">F-distribution — for ANOVA and regression</div></div>
+        <div class="row"><span class="fn pink">unif(x, min, max)</span><div class="def">Uniform — equal probability in range<span class="note">E[X]=(min+max)/2</span></div></div>
+        <div class="row"><span class="fn pink">nbinom(x, size, prob)</span><div class="def">Negative binomial — overdispersed counts<span class="note">Common in RNA-seq (DESeq2, edgeR use this)</span></div></div>
+        <div class="row"><span class="fn pink">geom(x, prob)</span><div class="def">Geometric — trials until first success</div></div>
+        <div class="row"><span class="fn pink">hyper(x, m, n, k)</span><div class="def">Hypergeometric — sampling without replacement<span class="note">Used in gene set enrichment (Fisher's exact test)</span></div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 12. STATISTICAL TESTS -->
+  <div class="section" id="tests">
+    <div class="section-label"><span class="num">12</span><h2>Statistical Tests</h2></div>
+    <div class="grid wide">
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a1)"></div><h3>Normality & Variance</h3></div>
+        <div class="row"><span class="fn green">shapiro.test(x)</span><div class="def">Shapiro-Wilk normality test<span class="note">p &gt; 0.05 → data is normal. Run BEFORE t-test.</span></div></div>
+        <div class="row"><span class="fn green">ks.test(x, "pnorm")</span><div class="def">Kolmogorov-Smirnov — compares to distribution</div></div>
+        <div class="row"><span class="fn green">var.test(x, y)</span><div class="def">F-test — tests if two variances are equal<span class="note">Run before t-test to decide var.equal=T or F</span></div></div>
+        <div class="row"><span class="fn green">bartlett.test(x~g)</span><div class="def">Bartlett — equal variances across groups (ANOVA assumption)</div></div>
+        <div class="row"><span class="fn green">leveneTest(x~g)</span><div class="def">Levene — more robust to non-normality (car package)</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a2)"></div><h3>Parametric Tests (assume normality)</h3></div>
+        <div class="row wide-label"><span class="fn orange">t.test(x, mu=val)</span><div class="def">One-sample t-test — compare mean to known value<span class="note">df = n - 1</span></div></div>
+        <div class="row wide-label"><span class="fn orange">t.test(x, y)</span><div class="def">Two-sample t-test — compare two group means<span class="note">df = n1+n2-2 · var.equal=FALSE uses Welch correction</span></div></div>
+        <div class="row wide-label"><span class="fn orange">t.test(x, y, paired=T)</span><div class="def">Paired t-test — same subjects measured twice<span class="note">Equivalent to one-sample test on differences</span></div></div>
+        <div class="row wide-label"><span class="fn orange">oneway.test(x ~ group)</span><div class="def">One-way ANOVA — compare 3+ group means</div></div>
+        <div class="row wide-label"><span class="fn orange">aov(y ~ x, data=df)</span><div class="def">ANOVA model object — use summary() on result</div></div>
+        <div class="row wide-label"><span class="fn orange">TukeyHSD(aov_result)</span><div class="def">Post-hoc test — pairwise comparisons after ANOVA</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a3)"></div><h3>Non-Parametric Tests</h3></div>
+        <div class="row wide-label"><span class="fn blue">wilcox.test(x, mu=val)</span><div class="def">One-sample Wilcoxon — non-parametric t-test</div></div>
+        <div class="row wide-label"><span class="fn blue">wilcox.test(x, y)</span><div class="def">Mann-Whitney U — two independent groups</div></div>
+        <div class="row wide-label"><span class="fn blue">wilcox.test(x, y, paired=T)</span><div class="def">Wilcoxon signed-rank — paired non-parametric</div></div>
+        <div class="row wide-label"><span class="fn blue">kruskal.test(x ~ group)</span><div class="def">Kruskal-Wallis — non-parametric ANOVA</div></div>
+        <div class="row wide-label"><span class="fn blue">friedman.test(matrix)</span><div class="def">Friedman — non-parametric repeated measures</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a4)"></div><h3>Categorical & Enrichment Tests</h3></div>
+        <div class="row"><span class="fn pink">chisq.test(table)</span><div class="def">Chi-squared — independence of two categorical vars<span class="note">Requires expected counts ≥ 5</span></div></div>
+        <div class="row"><span class="fn pink">fisher.test(table)</span><div class="def">Fisher's exact test — small sample sizes<span class="note">Used extensively in gene set enrichment, GO terms</span></div></div>
+        <div class="row"><span class="fn pink">prop.test(x, n)</span><div class="def">Test if proportion equals value</div></div>
+        <div class="row"><span class="fn pink">binom.test(x, n, p)</span><div class="def">Exact binomial test for counts</div></div>
+        <div class="row"><span class="fn pink">mcnemar.test(table)</span><div class="def">McNemar — paired categorical data (before/after)</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a5)"></div><h3>Multiple Testing Correction</h3></div>
+        <div class="row"><span class="fn yellow">p.adjust(pvals, method)</span><div class="def">Adjust p-values for multiple comparisons<span class="note">method="BH" → Benjamini-Hochberg (FDR) — standard in genomics</span><span class="note">method="bonferroni" → conservative, family-wise error</span><span class="note">method="holm" → step-down, less conservative than bonferroni</span></div></div>
+        <div class="row"><span class="fn yellow">qvalue (qvalue pkg)</span><div class="def">FDR-based q-values — common in RNA-seq</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 13. LINEAR MODELS -->
+  <div class="section" id="linear">
+    <div class="section-label"><span class="num">13</span><h2>Linear Models & Regression</h2></div>
+    <div class="grid wide">
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a1)"></div><h3>Linear Regression</h3></div>
+        <div class="row"><span class="fn green">lm(y ~ x, data=df)</span><div class="def">Fit linear model: y = β₀ + β₁x + ε</div></div>
+        <div class="row"><span class="fn green">lm(y ~ x1 + x2)</span><div class="def">Multiple regression — two predictors</div></div>
+        <div class="row"><span class="fn green">lm(y ~ x1 * x2)</span><div class="def">Interaction — includes x1, x2, and x1:x2</div></div>
+        <div class="row"><span class="fn green">lm(y ~ x1 + 0)</span><div class="def">Regression through origin — no intercept</div></div>
+        <div class="row"><span class="fn green">summary(fit)</span><div class="def">Coefficients, SE, t, p-value, R², F-stat</div></div>
+        <div class="row"><span class="fn green">coef(fit)</span><div class="def">Extract coefficient values</div></div>
+        <div class="row"><span class="fn green">confint(fit)</span><div class="def">95% confidence intervals for coefficients</div></div>
+        <div class="row"><span class="fn green">fitted(fit)</span><div class="def">Predicted values (ŷ)</div></div>
+        <div class="row"><span class="fn green">residuals(fit)</span><div class="def">Residuals (y - ŷ)</div></div>
+        <div class="row"><span class="fn green">predict(fit, newdata)</span><div class="def">Predict for new observations</div></div>
+        <div class="row"><span class="fn green">anova(fit)</span><div class="def">ANOVA table for the model</div></div>
+        <div class="row"><span class="fn green">anova(fit1, fit2)</span><div class="def">Compare two nested models</div></div>
+        <div class="row"><span class="fn green">AIC(fit) / BIC(fit)</span><div class="def">Model selection criteria — lower is better</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a2)"></div><h3>Generalised Linear Models</h3></div>
+        <div class="row wide-label"><span class="fn orange">glm(y ~ x, family=binomial)</span><div class="def">Logistic regression — binary outcome (0/1)<span class="note">Coefficients are log-odds. exp(coef) = odds ratio.</span></div></div>
+        <div class="row wide-label"><span class="fn orange">glm(y ~ x, family=poisson)</span><div class="def">Poisson regression — count data<span class="note">Assumes mean = variance</span></div></div>
+        <div class="row wide-label"><span class="fn orange">glm(y ~ x, family=Gamma)</span><div class="def">Gamma regression — positive continuous, right-skewed</div></div>
+        <div class="row"><span class="fn orange">summary(glm_fit)</span><div class="def">Deviance, AIC, z-scores, p-values</div></div>
+        <div class="row"><span class="fn orange">exp(coef(glm_fit))</span><div class="def">Odds ratios (logistic) or rate ratios (Poisson)</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a3)"></div><h3>Model Diagnostics</h3></div>
+        <div class="row"><span class="fn blue">plot(fit)</span><div class="def">4-panel diagnostic plots<span class="note">Residuals vs Fitted · Q-Q · Scale-Location · Leverage</span></div></div>
+        <div class="row"><span class="fn blue">shapiro.test(residuals(fit))</span><div class="def">Test residuals for normality</div></div>
+        <div class="row"><span class="fn blue">hatvalues(fit)</span><div class="def">Leverage values — influence of each point</div></div>
+        <div class="row"><span class="fn blue">cooks.distance(fit)</span><div class="def">Cook's D — overall influence measure</div></div>
+        <div class="row"><span class="fn blue">vif(fit) [car pkg]</span><div class="def">Variance inflation factor — detect multicollinearity<span class="note">VIF &gt; 10 is problematic</span></div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 14. BIOLOGY PACKAGES -->
+  <div class="section" id="bio">
+    <div class="section-label"><span class="num">14</span><h2>Biology & Bioinformatics Packages</h2></div>
+    <div class="grid wide">
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a1)"></div><h3>Package Management</h3></div>
+        <div class="row"><span class="fn green">install.packages("ggplot2")</span><div class="def">Install from CRAN</div></div>
+        <div class="row wide-label"><span class="fn green">BiocManager::install("DESeq2")</span><div class="def">Install from Bioconductor<span class="note">install.packages("BiocManager") first</span></div></div>
+        <div class="row"><span class="fn green">library(ggplot2)</span><div class="def">Load installed package</div></div>
+        <div class="row"><span class="fn green">require(pkg)</span><div class="def">Load — returns FALSE if not installed (safe in scripts)</div></div>
+        <div class="row"><span class="fn green">installed.packages()</span><div class="def">List all installed packages</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a2)"></div><h3>dplyr — Data Manipulation</h3></div>
+        <div class="row"><span class="fn orange">filter(df, col &gt; 5)</span><div class="def">Keep rows matching condition</div></div>
+        <div class="row"><span class="fn orange">select(df, col1, col2)</span><div class="def">Keep specific columns</div></div>
+        <div class="row"><span class="fn orange">mutate(df, new=col*2)</span><div class="def">Add or transform columns</div></div>
+        <div class="row"><span class="fn orange">arrange(df, col)</span><div class="def">Sort rows by column<span class="note">arrange(df, desc(col)) for descending</span></div></div>
+        <div class="row wide-label"><span class="fn orange">group_by(df, group) |&gt; summarise(m=mean(x))</span><div class="def">Group then aggregate<span class="note">|&gt; is the native pipe (R 4.1+). %>% is magrittr pipe.</span></div></div>
+        <div class="row"><span class="fn orange">left_join(df1, df2, by="id")</span><div class="def">Keep all rows from df1, match df2</div></div>
+        <div class="row"><span class="fn orange">inner_join / full_join</span><div class="def">Inner (both match) / Full (all rows)</div></div>
+        <div class="row"><span class="fn orange">distinct(df, col)</span><div class="def">Remove duplicate rows</div></div>
+        <div class="row"><span class="fn orange">rename(df, new=old)</span><div class="def">Rename column</div></div>
+        <div class="row"><span class="fn orange">count(df, col)</span><div class="def">Count occurrences per group</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a3)"></div><h3>tidyr — Tidy Data</h3></div>
+        <div class="row wide-label"><span class="fn blue">pivot_longer(df, cols, names_to, values_to)</span><div class="def">Wide → long format<span class="note">Essential for ggplot2 — needs long format</span></div></div>
+        <div class="row wide-label"><span class="fn blue">pivot_wider(df, names_from, values_from)</span><div class="def">Long → wide format</div></div>
+        <div class="row"><span class="fn blue">separate(df, col, into, sep)</span><div class="def">Split one column into multiple<div class="ex">separate(df,"gene_id",c("gene","id"),sep="_")</div></div></div>
+        <div class="row"><span class="fn blue">unite(df, new, c1, c2, sep)</span><div class="def">Merge columns into one</div></div>
+        <div class="row"><span class="fn blue">drop_na(df)</span><div class="def">Remove rows with any NA</div></div>
+        <div class="row"><span class="fn blue">replace_na(df, list(col=0))</span><div class="def">Replace NA with specified values</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a4)"></div><h3>Bioconductor — RNA-seq</h3></div>
+        <div class="row"><span class="fn pink">DESeqDataSetFromMatrix()</span><div class="def">Create DESeq2 dataset from count matrix</div></div>
+        <div class="row"><span class="fn pink">DESeq(dds)</span><div class="def">Run full DESeq2 pipeline (normalise + test)</div></div>
+        <div class="row"><span class="fn pink">results(dds)</span><div class="def">Extract differential expression results<span class="note">log2FoldChange, pvalue, padj columns</span></div></div>
+        <div class="row"><span class="fn pink">DGEList() [edgeR]</span><div class="def">Create edgeR object from count data</div></div>
+        <div class="row"><span class="fn pink">calcNormFactors()</span><div class="def">TMM normalisation in edgeR</div></div>
+        <div class="row"><span class="fn pink">voom() [limma]</span><div class="def">Convert counts to log-CPM with precision weights</div></div>
+        <div class="row"><span class="fn pink">makeGRangesFromDataFrame()</span><div class="def">Create genomic ranges object</div></div>
+        <div class="row"><span class="fn pink">Biostrings::readDNAStringSet()</span><div class="def">Read FASTA file of DNA sequences</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 15. PLOTTING -->
+  <div class="section" id="plotting">
+    <div class="section-label"><span class="num">15</span><h2>Plotting — Base R & ggplot2</h2></div>
+    <div class="grid wide">
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a5)"></div><h3>Base R Plots</h3></div>
+        <div class="row"><span class="fn yellow">plot(x, y)</span><div class="def">Scatter plot<span class="note">type="l" line · "b" both · "h" histogram-like</span></div></div>
+        <div class="row"><span class="fn yellow">hist(x, breaks=20)</span><div class="def">Histogram</div></div>
+        <div class="row"><span class="fn yellow">boxplot(x ~ group)</span><div class="def">Boxplot by group</div></div>
+        <div class="row"><span class="fn yellow">barplot(table(x))</span><div class="def">Bar chart from frequency table</div></div>
+        <div class="row"><span class="fn yellow">pie(table(x))</span><div class="def">Pie chart</div></div>
+        <div class="row"><span class="fn yellow">heatmap(M)</span><div class="def">Heatmap with clustering</div></div>
+        <div class="row"><span class="fn yellow">pairs(df)</span><div class="def">Pairwise scatter plot matrix</div></div>
+        <div class="row"><span class="fn yellow">abline(fit)</span><div class="def">Add regression line to existing plot</div></div>
+        <div class="row"><span class="fn yellow">par(mfrow=c(2,2))</span><div class="def">Arrange 4 plots in 2×2 grid</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="stripe" style="background:var(--a6)"></div><h3>ggplot2</h3></div>
+        <div class="row wide-label"><span class="fn teal">ggplot(df, aes(x, y)) + geom_point()</span><div class="def">Scatter plot — aes maps variables to aesthetics</div></div>
+        <div class="row wide-label"><span class="fn teal">+ geom_line()</span><div class="def">Line plot</div></div>
+        <div class="row wide-label"><span class="fn teal">+ geom_bar(stat="identity")</span><div class="def">Bar chart</div></div>
+        <div class="row wide-label"><span class="fn teal">+ geom_histogram(bins=30)</span><div class="def">Histogram</div></div>
+        <div class="row wide-label"><span class="fn teal">+ geom_boxplot()</span><div class="def">Boxplot</div></div>
+        <div class="row wide-label"><span class="fn teal">+ geom_violin()</span><div class="def">Violin plot — shows full distribution</div></div>
+        <div class="row wide-label"><span class="fn teal">+ geom_smooth(method="lm")</span><div class="def">Add regression line with confidence band</div></div>
+        <div class="row wide-label"><span class="fn teal">+ facet_wrap(~ group)</span><div class="def">Separate panel per group</div></div>
+        <div class="row wide-label"><span class="fn teal">+ scale_color_manual(values=c(...))</span><div class="def">Custom colours</div></div>
+        <div class="row wide-label"><span class="fn teal">+ theme_classic()</span><div class="def">Clean publication-ready theme<span class="note">theme_bw() · theme_minimal() · theme_void()</span></div></div>
+        <div class="row wide-label"><span class="fn teal">+ labs(title, x, y, color)</span><div class="def">Set axis and legend labels</div></div>
+        <div class="row wide-label"><span class="fn teal">ggsave("plot.pdf", width=6, height=4)</span><div class="def">Save plot to file<span class="note">pdf, png, svg, tiff supported</span></div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 16. TRAPS -->
+  <div class="section" id="traps">
+    <div class="section-label"><span class="num">16</span><h2>Common Traps & Rules</h2></div>
+    <div class="trap-grid">
+      <div class="trap"><div class="trap-fn">summary() ≠ Mode</div><div class="trap-desc">Returns Min, Q1, Median, Mean, Q3, Max. Mode is never included.</div></div>
+      <div class="trap"><div class="trap-fn">x == NA is always NA</div><div class="trap-desc">Never use == to check NA. Always use is.na(x).</div></div>
+      <div class="trap"><div class="trap-fn">byrow=FALSE by default</div><div class="trap-desc">matrix() fills column by column unless byrow=TRUE.</div></div>
+      <div class="trap"><div class="trap-fn">df = n1+n2-2</div><div class="trap-desc">Degrees of freedom for two-sample t-test.<span class="trap-note">One-sample: df = n-1</span></div></div>
+      <div class="trap"><div class="trap-fn">t-test is PARAMETRIC</div><div class="trap-desc">Assumes normality. Wilcoxon is the non-parametric alternative.</div></div>
+      <div class="trap"><div class="trap-fn">sep="\t" not sep="tab"</div><div class="trap-desc">Tab character in R strings is the escape \t.</div></div>
+      <div class="trap"><div class="trap-fn">Var(aX+b) = a²Var(X)</div><div class="trap-desc">Constant b vanishes entirely. Only scaling a matters. b shifts, not spreads.</div></div>
+      <div class="trap"><div class="trap-fn">norm(u, "2") is Euclidean</div><div class="trap-desc">c(4,1) → sqrt(4²+1²) = sqrt(17) ≈ 4.12</div></div>
+      <div class="trap"><div class="trap-fn">E[X] = 1/λ for Exponential</div><div class="trap-desc">If f(x)=λe^(−λx), mean=1/λ. f(x)=5e^(−5x) → mean=0.2</div></div>
+      <div class="trap"><div class="trap-fn">Cov is NOT always positive</div><div class="trap-desc">Can be negative (inverse relationship) or zero. Correlation normalises it to [-1,1].</div></div>
+      <div class="trap"><div class="trap-fn">oneway.test() not oneway.anova()</div><div class="trap-desc">oneway.anova() does not exist. Use oneway.test() or aov().</div></div>
+      <div class="trap"><div class="trap-fn">Binomial uses PMF not PDF</div><div class="trap-desc">PMF for discrete. PDF for continuous. Binomial is discrete → PMF.</div></div>
+      <div class="trap"><div class="trap-fn">R is 1-indexed</div><div class="trap-desc">x[1] is the first element. Python uses x[0].</div></div>
+      <div class="trap"><div class="trap-fn">lst[[i]] vs lst[i]</div><div class="trap-desc">[[i]] extracts the element. [i] returns a sub-list.</div></div>
+      <div class="trap"><div class="trap-fn">Poisson: mean = variance</div><div class="trap-desc">If var >> mean, data is overdispersed → use negative binomial.</div></div>
+      <div class="trap"><div class="trap-fn">cbind → adds columns</div><div class="trap-desc">Two length-3 vectors → matrix with 3 rows, 2 columns.</div></div>
+    </div>
+  </div>
+
+  <footer>R CHEATSHEET · DATA SCIENCE FOR BIOLOGISTS · COMPREHENSIVE REFERENCE</footer>
+
+</div>
+</body>
+</html>
